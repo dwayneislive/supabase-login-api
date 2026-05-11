@@ -7,10 +7,16 @@ const supabase = createClient(
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST allowed" })
+    return res.status(405).json({ error: "Use POST" })
   }
 
-  const { email, password } = req.body
+  console.log("BODY RECEIVED:", req.body)
+
+  const { email, password } = req.body || {}
+
+  if (!email || !password) {
+    return res.status(400).json({ error: "Missing email or password" })
+  }
 
   const { data, error } =
     await supabase.auth.signInWithPassword({
@@ -23,7 +29,7 @@ export default async function handler(req, res) {
   }
 
   return res.status(200).json({
-    user: data.user,
-    session: data.session
+    success: true,
+    user: data.user
   })
 }
