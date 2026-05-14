@@ -1,35 +1,85 @@
-import { createClient } from "@supabase/supabase-js"
+import * as React from "react"
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-)
+export default function Login() {
+    const [email, setEmail] = React.useState("")
+    const [password, setPassword] = React.useState("")
+    const [message, setMessage] = React.useState("")
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Use POST" })
-  }
+    async function handleSignup() {
+        if (!window.supabase) {
+            setMessage("Supabase not loaded")
+            return
+        }
 
-  console.log("BODY RECEIVED:", req.body)
+        const supabase = window.supabase.createClient(
+            "https://afdgorxpsdtcwdiixdvs.supabase.co",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmZGdvcnhwc2R0Y3dkaWl4ZHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODgzMTAsImV4cCI6MjA5NDA2NDMxMH0.NvHHBDkmMSGU5XOlf09jAsCS-g8FMqhZO-sRdhD0i4U"
+        )
 
-  const { email, password } = req.body || {}
+        const { error } = await supabase.auth.signUp({
+            email,
+            password,
+        })
 
-  if (!email || !password) {
-    return res.status(400).json({ error: "Missing email or password" })
-  }
+        if (error) {
+            setMessage(error.message)
+        } else {
+            setMessage("Account created!")
+        }
+    }
 
-  const { data, error } =
-    await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    async function handleLogin() {
+        if (!window.supabase) {
+            setMessage("Supabase not loaded")
+            return
+        }
 
-  if (error) {
-    return res.status(400).json({ error: error.message })
-  }
+        const supabase = window.supabase.createClient(
+            "https://afdgorxpsdtcwdiixdvs.supabase.co",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmZGdvcnhwc2R0Y3dkaWl4ZHZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODgzMTAsImV4cCI6MjA5NDA2NDMxMH0.NvHHBDkmMSGU5XOlf09jAsCS-g8FMqhZO-sRdhD0i4U"
+        )
 
-  return res.status(200).json({
-    success: true,
-    user: data.user
-  })
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        })
+
+        if (error) {
+            setMessage(error.message)
+        } else {
+            window.location.href = "/welcome"
+        }
+    }
+
+    return (
+        <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+                padding: 20,
+                maxWidth: 300,
+            }}
+        >
+            <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+            />
+
+            <button onClick={handleLogin}>Login</button>
+
+            <button onClick={handleSignup}>Sign Up</button>
+
+            <p>{message}</p>
+        </div>
+    )
 }
